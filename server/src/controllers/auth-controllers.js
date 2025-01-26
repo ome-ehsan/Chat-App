@@ -50,10 +50,54 @@ export const signup = async (req,res)=>{
     }
 }
 
-export const login = (req,res)=>{
-    res.status(200).send("Login page");
-}
+export const login = async (req,res)=>{
+        //first fetch email and pass
+        const {email, password} = req.body;
+    try{
+
+        //now check if credentials exist
+        if(!email || !password){
+            return res.status(400).json( {msg : "invalid credentials"} );
+        };
+        // if provided check whether user exists
+        const user = await User.findOne({email});
+        if(!user){
+            return res.status(400).json( {msg : "user doesn't exist"} );
+        };
+        // if passwrd is provided check if its valid
+        const isValidPass = await bcrypt.compare(password, user.password); 
+        if(!isValidPass){
+            return res.status(400).json( {msg : "invalid credentials"} );
+        };
+
+        generateJWT(user._id,res);
+        return res.status(200).json({
+            _id : user._id,
+            email : user.email,
+            fullName : user.fullName,
+            profilePicture : user.profilePicture
+        });
+    }catch(err){
+        console.log(`Login up error : ${err.message}`);
+        return res.status(500).json({ msg : "internal server error"});
+    }
+};
 
 export const logout = (req,res)=>{
-    res.status(200).send("Logout page");
+    try{
+        res.cookie("jwt", "", { maxAge : 0 });
+        return res.status(200).json({
+            msg : "logged out successfully"
+        });
+
+    }catch(err){
+        console.log("logout error: ", err.message);
+        return res.status(500).json({
+            msg: "internal server error"
+        });
+    }
+}
+
+export const updateProfile = async (req,res)=>{
+    ///
 }
