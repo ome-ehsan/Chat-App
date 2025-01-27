@@ -1,6 +1,7 @@
 import { User } from "../models/user-model.js";
 import bcrypt from "bcryptjs"
 import { generateJWT } from "../libs/utils.js";
+import cld from "../libs/cloudinary.js";
 
 export const signup = async (req,res)=>{
 
@@ -48,7 +49,7 @@ export const signup = async (req,res)=>{
         console.log(`Sign up error : ${err.message}`);
         return res.status(500).json({ msg : "internal server error"});
     }
-}
+};
 
 export const login = async (req,res)=>{
         //first fetch email and pass
@@ -96,8 +97,38 @@ export const logout = (req,res)=>{
             msg: "internal server error"
         });
     }
-}
+};
 
 export const updateProfile = async (req,res)=>{
-    ///
-}
+    try{
+        const {profilePicture} = req.body;
+        const userId = req.user._id;
+
+        if(!profilePicture){
+            return res.status(400).json({
+                msg : "profile picture is required"
+            })
+        };
+
+        const uploadToCld = await cld.uploader.upload(profilePicture);
+        const updatedUser = await User.findByIdAndUpdate(userId, {profilePicture : uploadToCld.secure_url}, {new:true} );
+        return res.status(200).json(updatedUser);
+    }catch(err){
+        console.log("Update Error: ", err.message);
+        return res.status(500).json({
+            msg : "internal server error"
+        })
+    }
+};
+
+export const returnUser = (req,res)=>{
+    try{
+        return res.status(200).json(req.user);
+    }catch(err){
+        console.log("check route error: ", err.message);
+        return res.status(500).json({
+            msg : "internal server error"
+        })
+    }
+};
+
