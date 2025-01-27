@@ -19,7 +19,7 @@ export const protectRoute = async (req, res, next)=>{
             })
         };
         // token provided, then validate
-        const user = await User.findById(decodedToken.userId);
+        const user = await User.findById(decodedToken.userId).select("-password");
         if(!user){
             return res.status(404).json({
                 msg : "user not found"
