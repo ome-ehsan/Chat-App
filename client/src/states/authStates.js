@@ -3,7 +3,7 @@ import { axiosInstance } from '../lib/axios.js'
 import toast from 'react-hot-toast';
 
 export const useAuthState = create( (set)=>({
-    authUser : null,  // will be used in app.jsx
+    authUser : null,  
     isCheckingAuth : true,
 
 
@@ -33,9 +33,23 @@ export const useAuthState = create( (set)=>({
 
             toast.success("Account created successfully!");
         } catch (err) {
-            toast.error(err.response.data.message);
+            toast.error(err.response.data.msg);
         } finally {
             set({ isSigningUp : false});
+        }
+    },
+    
+
+    login : async (formData)=>{
+        set({isLoggingIn : true});
+        try{
+            const res = await axiosInstance.post( "/auth/login", formData);
+            set({authUser : res.data});
+            toast.success("Logged in successfully");
+        }catch(err){
+            toast.error(err.response.data.msg);
+        }finally{
+            set({isLoggingIn : false });
         }
     },
 
@@ -45,7 +59,7 @@ export const useAuthState = create( (set)=>({
             set({authUser : null});
             toast.success("Logged out successfully");
         } catch (err) {
-            toast.error(err.response.data.message);
+            toast.error(err.response.data.msg);
         }
     }
 
