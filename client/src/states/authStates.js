@@ -25,6 +25,20 @@ export const useAuthState = create( (set)=>({
     isSigningUp : false,
     isUpdatingProfile : false ,
 
+    updateProfile : async (data) => {
+        set({isUpdatingProfile: true});
+        try{
+            const res = await axiosInstance.put("/auth/updateProfile", data);
+            set({authUser : res.data});
+            toast.success("Profile Updated Successfully");
+        }catch(err){
+            console.log("error in updateProfile: ", err.msg);
+            toast.error(err.response.data.msg);
+        }finally{
+            set({ isUpdatingProfile : false});
+        }
+    },
+
     signup : async (formData)=>{
         set({isSigningUp : true });
         try {
