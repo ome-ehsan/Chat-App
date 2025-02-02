@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 export const useAuthState = create( (set)=>({
     authUser : null,  
     isCheckingAuth : true,
+    onlineUsers : [],
 
 
     checkAuth: async()=>{
