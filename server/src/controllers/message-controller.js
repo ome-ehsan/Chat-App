@@ -1,6 +1,7 @@
 import { User } from "../models/user-model.js";
 import { Message } from "../models/message-model.js";
 import cld from "../libs/cloudinary.js";
+import { getReceiverSocketId , io} from "../libs/socket.js";
 
 export const getUserForSidebar = async(req,res)=>{
     try {
@@ -60,6 +61,10 @@ export const sendMessage = async(req,res)=>{
         await newMessage.save();
 
         //  socketIo implementation
+        const receiverSocketId = getReceiverSocketId(receiverId);
+        if(receiverSocketId){  // means user is online/active
+            io.to(receiverSocketId).emit("newMessage", newMessage);
+        }
 
         return res.status(201).json(newMessage);
     }catch(err){
