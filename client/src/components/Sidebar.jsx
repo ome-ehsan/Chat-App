@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useChatStates } from '../states/chatStates'
 import { useAuthState } from '../states/authStates';
 import SidebarSkeleton from './skeletons/SidebarSkeleton';
@@ -8,8 +8,12 @@ const Sidebar = () => {
     const { getUsers, users, isUsersLoading, selectedUser, setSelectedUser} = useChatStates();
 
     const { onlineUsers } = useAuthState();
+    const [ showOnlineUsers, setShowOnlineUsers ] = useState(false);
+    
 
     useEffect( ()=>{getUsers()}, [getUsers]);
+
+    const filteredUsers = showOnlineUsers ? users.filter( user => onlineUsers.includes(user._id)) : users ;
 
     if(isUsersLoading) return <SidebarSkeleton/> ;  // if users are in a loading states, show skeleton
 
@@ -25,9 +29,21 @@ const Sidebar = () => {
         </div>
 
         {/* active users toggle  */}
+        <div className="mt-3 hidden lg:flex items-center gap-2">
+          <label className="cursor-pointer flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={showOnlineUsers}
+              onChange={(e) => setShowOnlineUsers(e.target.checked)}
+              className="checkbox checkbox-sm"
+            />
+            <span className="text-sm">Show Active Users</span>
+          </label>
+          <span className="text-xs text-zinc-500">({onlineUsers.length - 1} Active)</span>
+        </div>
 
         <div className="overflow-y-auto w-full py-3">
-            {users.map((user) => (
+            {filteredUsers.map((user) => (
             <button
                 key={user._id}
                 onClick={() => setSelectedUser(user)}

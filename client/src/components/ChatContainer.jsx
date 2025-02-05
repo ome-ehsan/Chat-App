@@ -1,4 +1,5 @@
 import React from 'react'
+import { useRef } from 'react'
 import { useEffect } from 'react'
 import { useChatStates } from '../states/chatStates'
 import { useAuthState } from '../states/authStates'
@@ -8,14 +9,23 @@ import MessageInput from './MessageInput'
 import formatTo12Hour from '../lib/utils'
 
 const ChatContainer = () => {
-  const { getMessages, messages, isMessagesLoading, selectedUser } = useChatStates();
+  const { getMessages, messages, isMessagesLoading, selectedUser, startListeningForNewMessages, stopListeningForNewMessages } = useChatStates();
   const { authUser } = useAuthState();
+  const messageEndRef = useRef(null);
 
   useEffect(() => {
-    if (selectedUser?._id) {
-      getMessages(selectedUser._id);
-    }
+   
+    getMessages(selectedUser._id);
+    startListeningForNewMessages();
+    return () => stopListeningForNewMessages();
+    
   }, [selectedUser?._id, getMessages]);
+
+  useEffect(() => {
+    if(messageEndRef.current && messages){
+      messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   if (isMessagesLoading) {
     return (
@@ -36,6 +46,7 @@ const ChatContainer = () => {
           <div
             key={message._id}
             className={`chat ${message.senderId === authUser._id ? 'chat-end' : 'chat-start'}`} 
+            ref={messageEndRef}
           >
             {/* Profile picture */}
             <div className='chat-image avatar'>

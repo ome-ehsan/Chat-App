@@ -22,9 +22,13 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 
 const App = () => {
 
-  const { authUser, checkAuth, isCheckingAuth } = useAuthState();
+  const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthState();
   const { theme } = useThemeStates();
   
+
+  console.log({onlineUsers});
+
+
   useEffect( ()=>{
     checkAuth();
   }, [checkAuth]);
